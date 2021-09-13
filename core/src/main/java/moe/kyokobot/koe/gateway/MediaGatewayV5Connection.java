@@ -5,7 +5,6 @@ import moe.kyokobot.koe.codec.DefaultCodecs;
 import moe.kyokobot.koe.crypto.EncryptionMode;
 import moe.kyokobot.koe.internal.MediaConnectionImpl;
 import moe.kyokobot.koe.internal.dto.Codec;
-import moe.kyokobot.koe.internal.dto.StreamInfo;
 import moe.kyokobot.koe.internal.dto.data.*;
 import moe.kyokobot.koe.internal.dto.operation.OperationData;
 import moe.kyokobot.koe.internal.dto.operation.OperationHeartbeat;
@@ -17,12 +16,10 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
@@ -56,6 +53,7 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
                 new OperationData(
                         Op.IDENTIFY,
                         new Identify(
+                                null,
                                 connection.getGuildId(),
                                 connection.getClient().getClientId(),
                                 voiceServerInfo.getSessionId(),
@@ -202,10 +200,16 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
 
                 this.updateSpeaking(0);
 
-                sendInternalPayload(Op.CLIENT_CONNECT, new JsonObject()
-                        .add("audio_ssrc", ssrc)
-                        .add("video_ssrc", 0)
-                        .add("rtx_ssrc", 0));
+                sendInternalPayload(
+                        new OperationData(
+                                Op.CLIENT_CONNECT,
+                                new ClientConnect(
+                                        ssrc,
+                                        0,
+                                        0
+                                )
+                        )
+                );
             });
 
             connection.setConnectionHandler(conn);

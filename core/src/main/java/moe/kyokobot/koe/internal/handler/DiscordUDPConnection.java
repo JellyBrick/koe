@@ -8,9 +8,10 @@ import io.netty.channel.socket.DatagramChannel;
 import moe.kyokobot.koe.MediaConnection;
 import moe.kyokobot.koe.codec.Codec;
 import moe.kyokobot.koe.crypto.EncryptionMode;
-import moe.kyokobot.koe.internal.util.RTPHeaderWriter;
 import moe.kyokobot.koe.handler.ConnectionHandler;
 import moe.kyokobot.koe.internal.NettyBootstrapFactory;
+import moe.kyokobot.koe.internal.dto.data.SessionDescription;
+import moe.kyokobot.koe.internal.util.RTPHeaderWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +102,7 @@ public class DiscordUDPConnection implements Closeable, ConnectionHandler<InetSo
 
     @Override
     public void sendFrame(byte payloadType, int timestamp, ByteBuf data, int len, boolean extension) {
-        var buf = createPacket(payloadType, timestamp, data, len, extension);
+        ByteBuf buf = createPacket(payloadType, timestamp, data, len, extension);
         if (buf != null) {
             channel.writeAndFlush(buf);
         }
