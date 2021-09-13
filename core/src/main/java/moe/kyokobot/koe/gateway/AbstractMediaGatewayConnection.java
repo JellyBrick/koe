@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
+import java.io.DataInput;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -180,7 +181,7 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
             if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame frame = (TextWebSocketFrame) msg;
                 try (ByteBufInputStream content = new ByteBufInputStream(frame.content())) {
-                    OperationData object = JacksonUtils.getObjectMapper().readValue((InputStream) content, OperationData.class);
+                    OperationData object = JacksonUtils.getObjectMapper().readValue((DataInput) content, OperationData.class);
                     logger.warn("-> {}", object);
                     frame.release();
                     handlePayload(object);

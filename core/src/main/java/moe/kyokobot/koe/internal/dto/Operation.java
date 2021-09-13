@@ -6,8 +6,11 @@ import moe.kyokobot.koe.gateway.Op;
 import moe.kyokobot.koe.internal.dto.operation.OperationData;
 import moe.kyokobot.koe.internal.dto.operation.OperationHeartbeat;
 
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME,
-        property="op")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property="op",
+        visible = true
+)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OperationData.class,
                 name = "" + Op.HELLO,
