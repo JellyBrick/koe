@@ -12,10 +12,4 @@ public interface MediaGatewayConnection {
     void close(int code, @Nullable String reason);
 
     void updateSpeaking(int mask);
-
-    int getAudioSSRC();
-
-    int getVideoSSRC();
-
-    int getRetransmissionSSRC();
 }

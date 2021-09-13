@@ -8,7 +8,6 @@ import moe.kyokobot.koe.codec.OpusCodec;
 import moe.kyokobot.koe.gateway.SpeakingFlags;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implementation of {@link MediaFrameProvider} which automatically takes care of
@@ -74,7 +73,7 @@ public abstract class OpusAudioFrameProvider implements MediaFrameProvider {
     }
 
     @Override
-    public final boolean retrieve(Codec codec, ByteBuf buf, IntReference timestamp, AtomicBoolean unused) {
+    public final boolean retrieve(Codec codec, ByteBuf buf, IntReference timestamp) {
         if (codec.getPayloadType() != OpusCodec.PAYLOAD_TYPE) {
             return false;
         }

@@ -2,9 +2,7 @@ package moe.kyokobot.koe.media;
 
 import io.netty.buffer.ByteBuf;
 import moe.kyokobot.koe.codec.Codec;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Base interface for media frame providers. Note that Koe doesn't handle stuff such as speaking state, silent frames
  * or etc., these are implemented by codec-specific frame provider classes.
@@ -46,8 +44,7 @@ public interface MediaFrameProvider {
      * @param buf       {@link ByteBuf} the buffer where the media data should be written to.
      * @param timestamp {@link IntReference} reference to current frame timestamp, which must be updated with
      *                  timestamp of written frame.
-     * @param marker    Represents state of marker flag in RTP header.
      * @return If true, Koe will immediately attempt to poll a next frame, this is meant for video transmissions.
      */
-    boolean retrieve(Codec codec, ByteBuf buf, IntReference timestamp, @Nullable AtomicBoolean marker);
+    boolean retrieve(Codec codec, ByteBuf buf, IntReference timestamp);
 }

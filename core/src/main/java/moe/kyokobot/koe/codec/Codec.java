@@ -29,10 +29,6 @@ public abstract class Codec {
                 priority,
                 type.name().toLowerCase()
         );
-
-        if (rtxPayloadType != 0) {
-            this.jsonDescription.rtxPayloadType = (int) rtxPayloadType & 0xff;
-        }
     }
 
     public String getName() {

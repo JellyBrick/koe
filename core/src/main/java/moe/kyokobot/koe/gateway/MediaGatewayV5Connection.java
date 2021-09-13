@@ -52,19 +52,10 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
     protected void identify() {
         logger.debug("Identifying...");
 
-        Identify.Stream[] streams = new Identify.Stream[]{
-                new Identify.Stream(
-                        "video",
-                        "100",
-                        100
-                )
-        };
-
         sendInternalPayload(
                 new OperationData(
                         Op.IDENTIFY,
                         new Identify(
-                                streams,
                                 connection.getGuildId(),
                                 connection.getClient().getClientId(),
                                 voiceServerInfo.getSessionId(),
@@ -137,7 +128,6 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
                 // so if (d.any < 100) in this payload, the client should send video data with lowered resolution
                 // and bitrate.
 
-                sendClientConnect(true, true);
                 break;
             }
             default:
@@ -167,21 +157,6 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
         );
     }
 
-    @Override
-    public int getAudioSSRC() {
-        return ssrc;
-    }
-
-    @Override
-    public int getVideoSSRC() {
-        return ssrc + 1;
-    }
-
-    @Override
-    public int getRetransmissionSSRC() {
-        return ssrc + 2;
-    }
-
     private void setupHeartbeats(int interval) {
         if (eventExecutor != null) {
             heartbeatFuture = eventExecutor.scheduleAtFixedRate(this::heartbeat, interval, interval,
@@ -191,38 +166,6 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
 
     private void heartbeat() {
         sendInternalPayload(new OperationHeartbeat());
-    }
-
-    private void sendClientConnect(boolean enableAudio, boolean enableVideo) {
-        StreamInfo.Resolution resolution = new StreamInfo.Resolution();
-        resolution.type = "fixed";
-        resolution.width = 1280;
-        resolution.height = 720;
-        StreamInfo streamInfo = new StreamInfo();
-        streamInfo.type = "video";
-        streamInfo.rid = "100";
-        streamInfo.ssrc = ssrc + 1;
-        streamInfo.rtxSsrc = ssrc + 2;
-        streamInfo.active = true;
-        streamInfo.quality = 100;
-        streamInfo.maxBitrate = 2500000;
-        streamInfo.maxFramerate = 30;
-        streamInfo.maxResolution = resolution;
-        StreamInfo[] streams = new StreamInfo[]{
-                streamInfo
-        };
-
-        sendInternalPayload(
-                new OperationData(
-                        Op.CLIENT_CONNECT,
-                        new ClientConnect(
-                                enableAudio ? ssrc : 0,
-                                enableVideo ? (ssrc + 1) : 0,
-                                enableVideo ? (ssrc + 2) : 0,
-                                streams
-                        )
-                )
-        );
     }
 
     private void selectProtocol(String protocol) {
@@ -259,7 +202,10 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
 
                 this.updateSpeaking(0);
 
-                sendClientConnect(true, false);
+                sendInternalPayload(Op.CLIENT_CONNECT, new JsonObject()
+                        .add("audio_ssrc", ssrc)
+                        .add("video_ssrc", 0)
+                        .add("rtx_ssrc", 0));
             });
 
             connection.setConnectionHandler(conn);

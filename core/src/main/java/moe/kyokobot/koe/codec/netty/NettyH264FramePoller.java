@@ -35,8 +35,6 @@ public class NettyH264FramePoller extends AbstractFramePoller {
      */
     private final IntReference timestamp = new IntReference();
 
-    private final AtomicBoolean marker = new AtomicBoolean();
-
     @Override
     public void start() {
         if (this.polling) {
@@ -62,16 +60,16 @@ public class NettyH264FramePoller extends AbstractFramePoller {
         try {
             do {
                 ConnectionHandler<?> handler = connection.getConnectionHandler();
-                MediaFrameProvider sender = connection.getVideoSender();
+                MediaFrameProvider sender = connection.getAudioSender();
                 H264Codec codec = H264Codec.INSTANCE;
 
                 if (sender != null && handler != null && sender.canSendFrame(codec)) {
                     ByteBuf buf = allocator.buffer();
                     int start = buf.writerIndex();
-                    pollNext = sender.retrieve(codec, buf, timestamp, marker);
+                    pollNext = sender.retrieve(codec, buf, timestamp);
                     int len = buf.writerIndex() - start;
                     if (len != 0) {
-                        handler.sendFrame(H264Codec.PAYLOAD_TYPE, timestamp.get(), connection.getGatewayConnection().getVideoSSRC(), buf, len, false);
+                        handler.sendFrame(H264Codec.PAYLOAD_TYPE, timestamp.get(), buf, len, true);
                     }
                     buf.release();
                 }
