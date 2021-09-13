@@ -15,8 +15,8 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.EventExecutor;
 import moe.kyokobot.koe.VoiceServerInfo;
-import moe.kyokobot.koe.internal.NettyBootstrapFactory;
 import moe.kyokobot.koe.internal.MediaConnectionImpl;
+import moe.kyokobot.koe.internal.NettyBootstrapFactory;
 import moe.kyokobot.koe.internal.dto.Operation;
 import moe.kyokobot.koe.internal.dto.operation.OperationData;
 import moe.kyokobot.koe.internal.util.JacksonUtils;
@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
-import java.io.DataInput;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -129,7 +128,7 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
     protected void sendRaw(Operation object) throws JsonProcessingException {
         if (channel != null && channel.isOpen()) {
             String data = JacksonUtils.getObjectMapper().writeValueAsString(object);
-            logger.warn("<- {}", data);
+            logger.trace("<- {}", data);
             channel.writeAndFlush(new TextWebSocketFrame(data));
         }
     }
@@ -180,13 +179,11 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
 
             if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame frame = (TextWebSocketFrame) msg;
-                try (InputStream content = new ByteBufInputStream(frame.content())) {
-                    Operation object = JacksonUtils.getObjectMapper().readValue(content, Operation.class);
-                    logger.warn("-> {}", object);
-                    frame.release();
-                    if (object instanceof OperationData) {
-                        handlePayload((OperationData) object);
-                    }
+                Operation object = JacksonUtils.getObjectMapper().readValue((InputStream) new ByteBufInputStream(frame.content()), Operation.class);
+                logger.trace("-> {}", object);
+                frame.release();
+                if (object instanceof OperationData) {
+                    handlePayload((OperationData) object);
                 }
             } else if (msg instanceof CloseWebSocketFrame) {
                 CloseWebSocketFrame frame = (CloseWebSocketFrame) msg;
