@@ -12,7 +12,7 @@ public class Identify implements Data {
     public long userId;
     public String sessionId;
     public String token;
-    public boolean video;
+    public @Nullable Boolean video = null;
 
     public Identify(long serverId,
                     long userId,

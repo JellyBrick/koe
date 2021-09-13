@@ -180,11 +180,13 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
 
             if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame frame = (TextWebSocketFrame) msg;
-                try (ByteBufInputStream content = new ByteBufInputStream(frame.content())) {
-                    OperationData object = JacksonUtils.getObjectMapper().readValue((DataInput) content, OperationData.class);
+                try (InputStream content = new ByteBufInputStream(frame.content())) {
+                    Operation object = JacksonUtils.getObjectMapper().readValue(content, Operation.class);
                     logger.warn("-> {}", object);
                     frame.release();
-                    handlePayload(object);
+                    if (object instanceof OperationData) {
+                        handlePayload((OperationData) object);
+                    }
                 }
             } else if (msg instanceof CloseWebSocketFrame) {
                 CloseWebSocketFrame frame = (CloseWebSocketFrame) msg;
