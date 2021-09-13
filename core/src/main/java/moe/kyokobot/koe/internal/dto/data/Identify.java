@@ -1,8 +1,11 @@
 package moe.kyokobot.koe.internal.dto.data;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import moe.kyokobot.koe.gateway.Op;
 import moe.kyokobot.koe.internal.dto.Data;
 import org.jetbrains.annotations.Nullable;
 
+@JsonTypeName("" + Op.IDENTIFY)
 public class Identify implements Data {
     public @Nullable Stream[] streams;
     public long serverId;

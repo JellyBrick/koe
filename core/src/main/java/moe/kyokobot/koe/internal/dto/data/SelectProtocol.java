@@ -1,8 +1,11 @@
 package moe.kyokobot.koe.internal.dto.data;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import moe.kyokobot.koe.gateway.Op;
 import moe.kyokobot.koe.internal.dto.Codec;
 import moe.kyokobot.koe.internal.dto.Data;
 
+@JsonTypeName("" + Op.SELECT_PROTOCOL)
 public class SelectProtocol implements Data {
     public String protocol;
     public Codec[] codecs;

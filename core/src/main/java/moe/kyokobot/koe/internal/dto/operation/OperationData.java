@@ -3,11 +3,13 @@ package moe.kyokobot.koe.internal.dto.operation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import moe.kyokobot.koe.gateway.Op;
 import moe.kyokobot.koe.internal.dto.Data;
 import moe.kyokobot.koe.internal.dto.Operation;
 import moe.kyokobot.koe.internal.dto.data.*;
 
+@JsonTypeName("" + Op.HELLO)
 public class OperationData extends Operation {
     @JsonTypeInfo(
             use = JsonTypeInfo.Id.NAME,
