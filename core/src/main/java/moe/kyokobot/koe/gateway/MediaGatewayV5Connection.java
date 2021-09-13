@@ -35,7 +35,7 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
         Stream.concat(DefaultCodecs.audioCodecs.values().stream(), DefaultCodecs.videoCodecs.values().stream())
                 .map(moe.kyokobot.koe.codec.Codec::getJsonDescription)
                 .forEach(codecs::add);
-        SUPPORTED_CODECS = (Codec[]) codecs.toArray();
+        SUPPORTED_CODECS = codecs.toArray(new Codec[0]);
     }
 
     private int ssrc;
