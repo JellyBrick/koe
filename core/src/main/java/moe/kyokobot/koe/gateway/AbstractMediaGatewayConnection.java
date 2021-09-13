@@ -128,7 +128,7 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
     protected void sendRaw(Operation object) throws JsonProcessingException {
         if (channel != null && channel.isOpen()) {
             String data = JacksonUtils.getObjectMapper().writeValueAsString(object);
-            logger.trace("<- {}", data);
+            logger.warn("<- {}", data);
             channel.writeAndFlush(new TextWebSocketFrame(data));
         }
     }
@@ -181,7 +181,7 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
                 TextWebSocketFrame frame = (TextWebSocketFrame) msg;
                 try (ByteBufInputStream content = new ByteBufInputStream(frame.content())) {
                     OperationData object = JacksonUtils.getObjectMapper().readValue((InputStream) content, OperationData.class);
-                    logger.trace("-> {}", object);
+                    logger.warn("-> {}", object);
                     frame.release();
                     handlePayload(object);
                 }
