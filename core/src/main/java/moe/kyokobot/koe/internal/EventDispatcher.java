@@ -28,9 +28,9 @@ public class EventDispatcher implements KoeEventListener {
     }
 
     @Override
-    public void gatewayReady(InetSocketAddress target, int ssrc) {
+    public void gatewayReady(InetSocketAddress target, int ssrc, boolean resumed) {
         for (KoeEventListener listener : listeners) {
-            listener.gatewayReady(target, ssrc);
+            listener.gatewayReady(target, ssrc, resumed);
         }
     }
 

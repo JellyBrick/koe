@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.InetSocketAddress;
 
 public interface KoeEventListener {
-    void gatewayReady(InetSocketAddress target, int ssrc);
+    void gatewayReady(InetSocketAddress target, int ssrc, boolean resumed);
 
     void gatewayClosed(int code, @Nullable String reason, boolean byRemote);
 

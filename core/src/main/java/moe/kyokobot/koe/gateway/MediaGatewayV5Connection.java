@@ -46,6 +46,16 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
     }
 
     @Override
+    protected void resume() {
+        logger.debug("Resuming...");
+        sendInternalPayload(Op.RESUME, new JsonObject()
+                .addAsString("server_id", connection.getGuildId())
+                .add("session_id", voiceServerInfo.getSessionId())
+                .add("token", voiceServerInfo.getToken())
+                .add("video", true));
+    }
+
+    @Override
     protected void handlePayload(JsonObject object) {
         int op = object.getInt("op");
 
@@ -69,9 +79,14 @@ public class MediaGatewayV5Connection extends AbstractMediaGatewayConnection {
                         .collect(Collectors.toList());
                 address = new InetSocketAddress(ip, port);
 
-                connection.getDispatcher().gatewayReady((InetSocketAddress) address, ssrc);
+                connection.getDispatcher().gatewayReady((InetSocketAddress) address, ssrc, false);
                 logger.debug("Voice READY, ssrc: {}", ssrc);
                 selectProtocol("udp");
+                break;
+            }
+            case Op.RESUMED: {
+                connection.getDispatcher().gatewayReady((InetSocketAddress) address, ssrc, true);
+                logger.debug("Voice RESUMED, ssrc: {}", ssrc);
                 break;
             }
             case Op.SESSION_DESCRIPTION: {

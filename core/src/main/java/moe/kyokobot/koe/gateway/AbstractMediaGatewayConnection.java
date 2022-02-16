@@ -13,8 +13,8 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.EventExecutor;
 import moe.kyokobot.koe.VoiceServerInfo;
-import moe.kyokobot.koe.internal.NettyBootstrapFactory;
 import moe.kyokobot.koe.internal.MediaConnectionImpl;
+import moe.kyokobot.koe.internal.NettyBootstrapFactory;
 import moe.kyokobot.koe.internal.json.JsonObject;
 import moe.kyokobot.koe.internal.json.JsonParser;
 import moe.kyokobot.koe.internal.util.NettyFutureWrapper;
@@ -40,11 +40,12 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
     protected final URI websocketURI;
     protected final Bootstrap bootstrap;
     protected final SslContext sslContext;
-    protected final CompletableFuture<Void> connectFuture;
+    protected CompletableFuture<Void> connectFuture;
 
     protected EventExecutor eventExecutor;
     protected Channel channel;
     private boolean open;
+    private boolean resuming = false;
     private boolean closed = false;
 
     public AbstractMediaGatewayConnection(@NotNull MediaConnectionImpl connection,
@@ -101,12 +102,30 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
 
     protected abstract void identify();
 
+    protected abstract void resume();
+
     protected abstract void handlePayload(JsonObject object);
+
+    public boolean isResuming() {
+        return resuming;
+    }
 
     protected void onClose(int code, @Nullable String reason, boolean remote) {
         if (!closed) {
             closed = true;
-            connection.getDispatcher().gatewayClosed(code, reason, remote);
+            switch (code) {
+                case MediaCloseEventCode.SERVER_NOT_FOUND:
+                case MediaCloseEventCode.VOICE_SERVER_CRASHED:
+                case MediaCloseEventCode.AUTHENTICATION_FAILED:
+                case MediaCloseEventCode.SESSION_NO_LONGER_VALID:
+                case MediaCloseEventCode.DISCONNECTED:
+                    connection.getDispatcher().gatewayClosed(code, reason, remote);
+                    break;
+                default:
+                    resuming = true;
+                    connectFuture = new CompletableFuture<>();
+                    start();
+            }
         }
     }
 
@@ -153,8 +172,13 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
                     try {
                         handshaker.finishHandshake(ch, (FullHttpResponse) msg);
                         AbstractMediaGatewayConnection.this.open = true;
+                        AbstractMediaGatewayConnection.this.closed = false;
                         connectFuture.complete(null);
-                        AbstractMediaGatewayConnection.this.identify();
+                        if (isResuming()) {
+                            AbstractMediaGatewayConnection.this.resume();
+                        } else {
+                            AbstractMediaGatewayConnection.this.identify();
+                        }
                     } catch (WebSocketHandshakeException e) {
                         connectFuture.completeExceptionally(e);
                     }
@@ -181,7 +205,7 @@ public abstract class AbstractMediaGatewayConnection implements MediaGatewayConn
                     logger.debug("Websocket closed, code: {}, reason: {}", frame.statusCode(), frame.reasonText());
                 }
                 AbstractMediaGatewayConnection.this.open = false;
-                onClose(frame.statusCode(), frame.reasonText(), true);
+                close(frame.statusCode(), frame.reasonText());
             }
         }
 

@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 
 public class KoeEventAdapter implements KoeEventListener {
     @Override
-    public void gatewayReady(InetSocketAddress target, int ssrc) {
+    public void gatewayReady(InetSocketAddress target, int ssrc, boolean resumed) {
         //
     }
 
