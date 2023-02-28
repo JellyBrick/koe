@@ -242,7 +242,7 @@ public class MediaConnectionImpl implements MediaConnection {
         }
 
         disconnect();
-        client.removeConnection(guildId);
+        client.destroyConnection(guildId);
     }
 
     @Override
